@@ -2,18 +2,16 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { X, Upload, File, CheckCircle, AlertCircle } from "lucide-react";
-import { S3Service } from "../services/S3Service";
 import { FileUploadItem } from "../types";
+import { uploadToS3 } from "@/services/S3Service";
 
 interface FileUploaderProps {
-  s3Service: S3Service;
   currentPath: string;
   onClose: () => void;
   onUploadComplete: () => void;
 }
 
 export const FileUploader: React.FC<FileUploaderProps> = ({
-  s3Service,
   currentPath,
   onClose,
   onUploadComplete,
@@ -60,7 +58,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           ? `${currentPath}${item.file.name}`
           : item.file.name;
 
-        await s3Service.uploadFile(item.file, key, (progress) => {
+        await uploadToS3(item.file, key, (progress) => {
           setUploadItems((prev) =>
             prev.map((item, idx) => (idx === i ? { ...item, progress } : item))
           );

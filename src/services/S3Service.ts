@@ -1,52 +1,56 @@
-import { S3Client, ListObjectsV2Command, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
-import { AWSCredentials, S3Object, UploadProgress } from '../types';
+"use server";
 
-export class S3Service {
-  private s3Client: S3Client;
-  private bucketName: string;
+import {
+  ListObjectsV2Command,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+} from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import { AWSCredentials, S3Object, UploadProgress } from "../types";
+import { createClient } from "@/lib/s3Client";
 
-  constructor(credentials: AWSCredentials) {
-    this.s3Client = new S3Client({
-      region: credentials.region,
-      credentials: {
-        accessKeyId: credentials.accessKeyId,
-        secretAccessKey: credentials.secretAccessKey,
-      },
-    });
-    this.bucketName = credentials.bucketName;
+// ✅ Test S3 connection
+export async function testS3Connection(
+  credentials: AWSCredentials
+): Promise<void> {
+  try {
+    const s3Client = createClient(credentials);
+    const command = new HeadBucketCommand({ Bucket: credentials.bucketName });
+    await s3Client.send(command);
+  } catch (error) {
+    console.error("Error testing S3 connection:", error);
+    throw new Error("Failed to connect to S3 bucket");
   }
+}
 
-  async testConnection(): Promise<void> {
-    try {
-      const command = new HeadBucketCommand({ Bucket: this.bucketName });
-      await this.s3Client.send(command);
-    } catch (error) {
-      throw new Error('Failed to connect to S3 bucket');
-    }
-  }
-
-  async listObjects(prefix: string = ''): Promise<S3Object[]> {
+// ✅ List S3 objects
+export async function listS3Objects(
+  prefix: string = "",
+  credentials: AWSCredentials
+): Promise<S3Object[]> {
+  try {
+    const s3Client = createClient(credentials);
     const command = new ListObjectsV2Command({
-      Bucket: this.bucketName,
+      Bucket: credentials.bucketName,
       Prefix: prefix,
-      Delimiter: '/',
+      Delimiter: "/",
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await s3Client.send(command);
     const objects: S3Object[] = [];
+    console.log("response", response.Contents);
 
-    // Add folders (common prefixes)
     if (response.CommonPrefixes) {
       for (const prefix of response.CommonPrefixes) {
         if (prefix.Prefix) {
-          const name = prefix.Prefix.replace(/\/$/, '').split('/').pop() || '';
+          const name = prefix.Prefix.replace(/\/$/, "").split("/").pop() || "";
           objects.push({
             key: prefix.Prefix,
             size: 0,
             lastModified: new Date(),
-            etag: '',
-            storageClass: '',
+            etag: "",
+            storageClass: "",
             isFolder: true,
             name,
             path: prefix.Prefix,
@@ -55,18 +59,17 @@ export class S3Service {
       }
     }
 
-    // Add files
     if (response.Contents) {
       for (const object of response.Contents) {
         if (object.Key && object.Key !== prefix) {
-          const name = object.Key.split('/').pop() || '';
-          if (name) { // Skip empty names (folder markers)
+          const name = object.Key.split("/").pop() || "";
+          if (name) {
             objects.push({
               key: object.Key,
               size: object.Size || 0,
               lastModified: object.LastModified || new Date(),
-              etag: object.ETag || '',
-              storageClass: object.StorageClass || 'STANDARD',
+              etag: object.ETag || "",
+              storageClass: object.StorageClass || "STANDARD",
               isFolder: false,
               name,
               path: object.Key,
@@ -81,17 +84,25 @@ export class S3Service {
       if (!a.isFolder && b.isFolder) return 1;
       return a.name.localeCompare(b.name);
     });
+  } catch (error) {
+    console.error("Error listing S3 objects:", error);
+    throw new Error("Failed to list S3 objects");
   }
+}
 
-  async uploadFile(
-    file: File,
-    key: string,
-    onProgress?: (progress: UploadProgress) => void
-  ): Promise<void> {
+// ✅ Upload file to S3
+export async function uploadToS3(
+  file: File,
+  credentials: AWSCredentials,
+  key: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<void> {
+  try {
+    const s3Client = createClient(credentials);
     const upload = new Upload({
-      client: this.s3Client,
+      client: s3Client,
       params: {
-        Bucket: this.bucketName,
+        Bucket: credentials.bucketName,
         Key: key,
         Body: file,
         ContentType: file.type,
@@ -99,7 +110,7 @@ export class S3Service {
     });
 
     if (onProgress) {
-      upload.on('httpUploadProgress', (progress) => {
+      upload.on("httpUploadProgress", (progress) => {
         const loaded = progress.loaded || 0;
         const total = progress.total || file.size;
         onProgress({
@@ -111,23 +122,46 @@ export class S3Service {
     }
 
     await upload.done();
+  } catch (error) {
+    console.error("Error uploading file to S3:", error);
+    throw new Error("Failed to upload file to S3");
   }
+}
 
-  async deleteObject(key: string): Promise<void> {
+// ✅ Delete an object from S3
+export async function deleteS3Object(
+  key: string,
+  credentials: AWSCredentials
+): Promise<void> {
+  try {
+    const s3Client = createClient(credentials);
     const command = new DeleteObjectCommand({
-      Bucket: this.bucketName,
+      Bucket: credentials.bucketName,
       Key: key,
     });
-    await this.s3Client.send(command);
+    await s3Client.send(command);
+  } catch (error) {
+    console.error("Error deleting S3 object:", error);
+    throw new Error("Failed to delete S3 object");
   }
+}
 
-  async createFolder(folderPath: string): Promise<void> {
-    const key = folderPath.endsWith('/') ? folderPath : `${folderPath}/`;
+// ✅ Create a folder in S3
+export async function createS3Folder(
+  folderPath: string,
+  credentials: AWSCredentials
+): Promise<void> {
+  try {
+    const s3Client = createClient(credentials);
+    const key = folderPath.endsWith("/") ? folderPath : `${folderPath}/`;
     const command = new PutObjectCommand({
-      Bucket: this.bucketName,
+      Bucket: credentials.bucketName,
       Key: key,
-      Body: '',
+      Body: "",
     });
-    await this.s3Client.send(command);
+    await s3Client.send(command);
+  } catch (error) {
+    console.error("Error creating S3 folder:", error);
+    throw new Error("Failed to create S3 folder");
   }
 }

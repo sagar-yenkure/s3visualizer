@@ -2,19 +2,9 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
-import {
-  Folder,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Archive,
-  File,
-  MoreVertical,
-  Trash2,
-  Download,
-} from "lucide-react";
+import { Folder, File, MoreVertical, Trash2, Download } from "lucide-react";
 import { S3Object } from "../types";
+import { fileTypeMap } from "@/constants";
 
 interface FileItemProps {
   object: S3Object;
@@ -29,19 +19,10 @@ export const FileItem: React.FC<FileItemProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
 
-  const getFileIcon = (name: string, isFolder: boolean) => {
-    if (isFolder) return Folder;
-
-    const ext = name.split(".").pop()?.toLowerCase();
-
-    if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || ""))
-      return Image;
-    if (["mp4", "avi", "mov", "wmv", "flv"].includes(ext || "")) return Video;
-    if (["mp3", "wav", "flac", "aac"].includes(ext || "")) return Music;
-    if (["zip", "rar", "7z", "tar", "gz"].includes(ext || "")) return Archive;
-    if (["txt", "doc", "docx", "pdf"].includes(ext || "")) return FileText;
-
-    return File;
+  const getFileMeta = (name: string, isFolder: boolean) => {
+    if (isFolder) return { icon: Folder, color: "text-blue-500" };
+    const ext = name.split(".").pop()?.toLowerCase() || "";
+    return fileTypeMap[ext] || { icon: File, color: "text-gray-500" };
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -52,27 +33,10 @@ export const FileItem: React.FC<FileItemProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
-  const getIconColor = (name: string, isFolder: boolean): string => {
-    if (isFolder) return "text-blue-500";
-
-    const ext = name.split(".").pop()?.toLowerCase();
-
-    if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext || ""))
-      return "text-green-500";
-    if (["mp4", "avi", "mov", "wmv", "flv"].includes(ext || ""))
-      return "text-purple-500";
-    if (["mp3", "wav", "flac", "aac"].includes(ext || ""))
-      return "text-pink-500";
-    if (["zip", "rar", "7z", "tar", "gz"].includes(ext || ""))
-      return "text-orange-500";
-    if (["txt", "doc", "docx", "pdf"].includes(ext || ""))
-      return "text-red-500";
-
-    return "text-gray-500";
-  };
-
-  const IconComponent = getFileIcon(object.name, object.isFolder);
-  const iconColor = getIconColor(object.name, object.isFolder);
+  const { icon: IconComponent, color: iconColor } = getFileMeta(
+    object.name,
+    object.isFolder
+  );
 
   return (
     <div
@@ -113,7 +77,6 @@ export const FileItem: React.FC<FileItemProps> = ({
           <MoreVertical className="w-4 h-4 text-gray-600" />
         </button>
 
-        {/* Dropdown Menu */}
         {showMenu && (
           <>
             <div
@@ -125,8 +88,8 @@ export const FileItem: React.FC<FileItemProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Handle download logic here
                     setShowMenu(false);
+                    console.log(object);
                   }}
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                 >

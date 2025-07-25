@@ -12,6 +12,7 @@
     "@aws-sdk/client-s3": "^3.850.0",
     "@aws-sdk/lib-storage": "^3.850.0",
     "@eslint/js": "^9.31.0",
+    "@tanstack/react-query": "^5.83.0",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
     "aws-sdk": "^2.1692.0",
@@ -25,6 +26,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
+    "react-hot-toast": "^2.5.2",
     "typescript-eslint": "^8.38.0",
     "vite": "^7.0.6"
   },
