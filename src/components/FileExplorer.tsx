@@ -10,6 +10,7 @@ import { Upload, FolderPlus, LogOut, RefreshCw } from "lucide-react";
 import {
   useCreateS3Folder,
   useDeleteS3Object,
+  useDownloadFile,
   useListS3Objects,
 } from "@/features/S3Feature";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,8 @@ export const FileExplorer = ({
   const { mutateAsync: createS3Folder } = useCreateS3Folder();
   //  Delete file/folder
   const { mutateAsync: deleteS3Object } = useDeleteS3Object();
+  // Download file
+  const { mutateAsync: downloadFile } = useDownloadFile();
 
   const handlePathChange = (newPath: string) => setCurrentPath(newPath);
 
@@ -70,6 +73,10 @@ export const FileExplorer = ({
         loading: "deleting...",
       }
     );
+  };
+
+  const handleObjetDownload = (key: string) => {
+    downloadFile({ key, credentials: AWS_CREDENTIALS });
   };
 
   const handleDisconnect = () => {
@@ -167,6 +174,7 @@ export const FileExplorer = ({
               loading={loading}
               onFolderClick={(folder) => handlePathChange(folder.path)}
               onFileDelete={handleObjectDelete}
+              onFileDownload={handleObjetDownload}
             />
           )}
         </div>

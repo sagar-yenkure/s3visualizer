@@ -3,6 +3,7 @@
 import {
   createS3Folder,
   deleteS3Object,
+  downloadFile,
   listS3Objects,
   testS3Connection,
   uploadToS3,
@@ -95,5 +96,20 @@ export function useCreateS3Folder() {
       queryClient.invalidateQueries({ queryKey: ["s3-objects"] });
     },
     onError: () => toast.error("error while creating folder in s3"),
+  });
+}
+
+//download File
+export function useDownloadFile() {
+  return useMutation({
+    mutationFn: ({
+      key,
+      credentials,
+    }: {
+      key: string;
+      credentials: AWSCredentials;
+    }) => downloadFile(key, credentials),
+    onSuccess: (res) => window.open(res.signedUrl, "_blank"),
+    onError: () => toast.error("error while downloading file, try again"),
   });
 }

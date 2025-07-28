@@ -5,12 +5,15 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadBucketCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { AWSCredentials, S3Object, UploadProgress } from "../types";
 import { createClient } from "@/lib/s3Client";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { SIGNER_URL_EXPIRY } from "@/constants";
 
-// ✅ Test S3 connection
+// Test S3 connection
 export async function testS3Connection(
   credentials: AWSCredentials
 ): Promise<void> {
@@ -24,7 +27,7 @@ export async function testS3Connection(
   }
 }
 
-// ✅ List S3 objects
+// List S3 objects
 export async function listS3Objects(
   prefix: string = "",
   credentials: AWSCredentials
@@ -39,7 +42,7 @@ export async function listS3Objects(
 
     const response = await s3Client.send(command);
     const objects: S3Object[] = [];
-    console.log("response", response.Contents);
+    console.log("response", response);
 
     if (response.CommonPrefixes) {
       for (const prefix of response.CommonPrefixes) {
@@ -90,7 +93,7 @@ export async function listS3Objects(
   }
 }
 
-// ✅ Upload file to S3
+// Upload file to S3
 export async function uploadToS3(
   file: File,
   credentials: AWSCredentials,
@@ -128,7 +131,7 @@ export async function uploadToS3(
   }
 }
 
-// ✅ Delete an object from S3
+// Delete an object from S3
 export async function deleteS3Object(
   key: string,
   credentials: AWSCredentials
@@ -146,7 +149,7 @@ export async function deleteS3Object(
   }
 }
 
-// ✅ Create a folder in S3
+// Create a folder in S3
 export async function createS3Folder(
   folderPath: string,
   credentials: AWSCredentials
@@ -164,4 +167,20 @@ export async function createS3Folder(
     console.error("Error creating S3 folder:", error);
     throw new Error("Failed to create S3 folder");
   }
+}
+
+// download file from s3
+export async function downloadFile(key: string, credentials: AWSCredentials) {
+  const s3Client = createClient(credentials);
+  const command = new GetObjectCommand({
+    Bucket: credentials.bucketName,
+    Key: key,
+    ResponseContentDisposition: "attachment",
+  });
+
+  const signedUrl = await getSignedUrl(s3Client, command, {
+    expiresIn: SIGNER_URL_EXPIRY,
+  });
+
+  return { signedUrl };
 }

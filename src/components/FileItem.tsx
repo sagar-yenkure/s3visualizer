@@ -10,12 +10,14 @@ interface FileItemProps {
   object: S3Object;
   onClick?: (object: S3Object) => void;
   onDelete: (object: S3Object) => void;
+  onDownload: (url: string) => void;
 }
 
 export const FileItem: React.FC<FileItemProps> = ({
   object,
   onClick,
   onDelete,
+  onDownload,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -88,8 +90,8 @@ export const FileItem: React.FC<FileItemProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    onDownload(object.key);
                     setShowMenu(false);
-                    console.log(object);
                   }}
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                 >

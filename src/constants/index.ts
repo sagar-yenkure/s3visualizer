@@ -1,4 +1,19 @@
-import { Image, Video, Music, Archive, FileText } from "lucide-react";
+export const SIGNER_URL_EXPIRY = 60 * 5; // 5 mn
+
+import {
+  Image,
+  Video,
+  Music,
+  Archive,
+  FileText,
+  Cloud,
+  Globe,
+  CheckCircle,
+  Settings,
+  Shield,
+  Eye,
+  Key,
+} from "lucide-react";
 import { S3Object } from "@/types";
 
 export const fileTypeMap: {
@@ -59,16 +74,6 @@ export const regions = [
 ];
 
 export const demoObjects: S3Object[] = [
-  {
-    key: "documents/",
-    size: 0,
-    lastModified: new Date("2024-03-15"),
-    etag: '"d41d8cd98f00b204e9800998ecf8427e"',
-    storageClass: "STANDARD",
-    isFolder: true,
-    name: "Documents",
-    path: "documents/",
-  },
   {
     key: "images/",
     size: 0,
@@ -138,5 +143,138 @@ export const demoObjects: S3Object[] = [
     isFolder: false,
     name: "demo-video.mp4",
     path: "demo-video.mp4",
+  },
+];
+
+export const features = [
+  {
+    icon: Cloud,
+    title: "Direct S3 Connection",
+    description:
+      "Connect directly to your AWS S3 bucket without any intermediary services.",
+  },
+  {
+    icon: Globe,
+    title: "Beautiful Interface",
+    description:
+      "Modern, intuitive design that makes file management a pleasure.",
+  },
+  {
+    icon: CheckCircle,
+    title: "Drag & Drop Upload",
+    description:
+      "Upload files easily with drag and drop functionality and progress tracking.",
+  },
+  {
+    icon: Settings,
+    title: "Folder Management",
+    description:
+      "Create, navigate, and organize folders with breadcrumb navigation.",
+  },
+  {
+    icon: Shield,
+    title: "Secure & Private",
+    description:
+      "Your credentials stay in your browser. No server-side storage or logging.",
+  },
+  {
+    icon: Eye,
+    title: "File Preview",
+    description:
+      "View file metadata, sizes, and types with beautiful icons and layouts.",
+  },
+];
+
+const corsPolicy = `[
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "HEAD"
+        ],
+        "AllowedOrigins": [
+           "${process.env.NEXT_PUBLIC_IAM_ORIGIN}"
+        ],
+        "ExposeHeaders": [
+            "ETag"
+        ],
+        "MaxAgeSeconds": 3000
+    }
+]`;
+
+const iamPolicy = `{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-bucket-name",
+                "arn:aws:s3:::your-bucket-name/*"
+            ]
+        }
+    ]
+}`;
+
+export const setupSteps = [
+  {
+    id: "cors",
+    title: "Configure CORS Policy",
+    icon: Settings,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    steps: [
+      "Go to your AWS S3 Console",
+      "Select your bucket → Permissions tab",
+      'Find "Cross-origin resource sharing (CORS)"',
+      "Click Edit and paste the JSON below",
+      "Save changes",
+    ],
+    code: corsPolicy,
+    codeId: "cors-policy",
+  },
+  {
+    id: "iam",
+    title: "Required IAM Permissions",
+    icon: Shield,
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    borderColor: "border-green-200",
+    steps: [
+      "Go to AWS IAM Console",
+      "Create a new user or select existing user",
+      "Attach the policy below (inline or managed)",
+      "Generate Access Keys for the user",
+      'Replace "your-bucket-name" with your actual bucket name',
+    ],
+    code: iamPolicy,
+    codeId: "iam-policy",
+  },
+  {
+    id: "credentials",
+    title: "Get AWS Credentials",
+    icon: Key,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+    steps: [
+      "In AWS IAM Console, select your user",
+      'Go to "Security credentials" tab',
+      'Click "Create access key"',
+      'Choose "Application running outside AWS"',
+      "Copy the Access Key ID and Secret Access Key",
+      "Use these credentials in the connection form",
+    ],
   },
 ];
