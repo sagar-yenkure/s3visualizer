@@ -61,9 +61,9 @@ export const FileExplorer = ({
     }
   };
 
-  const handleFileUpload = async () => {
-    refetch();
+  const handleUploadComplete = async () => {
     setModals((prev) => ({ ...prev, uploader: false }));
+    refetch();
   };
 
   const handleObjectDelete = async (object: S3Object) => {
@@ -107,7 +107,7 @@ export const FileExplorer = ({
                 <button
                   onClick={() => refetch()}
                   disabled={loading}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                  className="p-2 text-gray-500 hover:cursor-pointer hover:text-gray-700 hover:bg-gray-100 rounded-lg"
                   title="Refresh"
                 >
                   <RefreshCw
@@ -122,7 +122,7 @@ export const FileExplorer = ({
                   onClick={() =>
                     setModals((prev) => ({ ...prev, createFolder: true }))
                   }
-                  className="flex items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100"
+                  className="flex hover:cursor-pointer items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100"
                 >
                   <FolderPlus className="w-4 h-4" />
                   <span>New Folder</span>
@@ -132,7 +132,7 @@ export const FileExplorer = ({
                   onClick={() =>
                     setModals((prev) => ({ ...prev, uploader: true }))
                   }
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+                  className="flex hover:cursor-pointer items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
                 >
                   <Upload className="w-4 h-4" />
                   <span>Upload</span>
@@ -140,9 +140,10 @@ export const FileExplorer = ({
 
                 <button
                   onClick={handleDisconnect}
-                  className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl"
+                  className="flex items-center hover:cursor-pointer space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl"
                 >
                   <LogOut className="w-4 h-4" />
+                  <span className="hidden md:flex">Disconnect</span>
                 </button>
               </div>
             </div>
@@ -184,7 +185,7 @@ export const FileExplorer = ({
           <FileUploader
             currentPath={currentPath}
             onClose={() => setModals((prev) => ({ ...prev, uploader: false }))}
-            onUploadComplete={handleFileUpload}
+            onUploadComplete={handleUploadComplete}
           />
         )}
         {modals.createFolder && (

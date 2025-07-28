@@ -7,8 +7,7 @@ import {
   HeadBucketCommand,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-import { AWSCredentials, S3Object, UploadProgress } from "../types";
+import { AWSCredentials, S3Object } from "../types";
 import { createClient } from "@/lib/s3Client";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { SIGNER_URL_EXPIRY } from "@/constants";
@@ -42,7 +41,6 @@ export async function listS3Objects(
 
     const response = await s3Client.send(command);
     const objects: S3Object[] = [];
-    console.log("response", response);
 
     if (response.CommonPrefixes) {
       for (const prefix of response.CommonPrefixes) {
@@ -90,44 +88,6 @@ export async function listS3Objects(
   } catch (error) {
     console.error("Error listing S3 objects:", error);
     throw new Error("Failed to list S3 objects");
-  }
-}
-
-// Upload file to S3
-export async function uploadToS3(
-  file: File,
-  credentials: AWSCredentials,
-  key: string,
-  onProgress?: (progress: UploadProgress) => void
-): Promise<void> {
-  try {
-    const s3Client = createClient(credentials);
-    const upload = new Upload({
-      client: s3Client,
-      params: {
-        Bucket: credentials.bucketName,
-        Key: key,
-        Body: file,
-        ContentType: file.type,
-      },
-    });
-
-    if (onProgress) {
-      upload.on("httpUploadProgress", (progress) => {
-        const loaded = progress.loaded || 0;
-        const total = progress.total || file.size;
-        onProgress({
-          loaded,
-          total,
-          percentage: Math.round((loaded / total) * 100),
-        });
-      });
-    }
-
-    await upload.done();
-  } catch (error) {
-    console.error("Error uploading file to S3:", error);
-    throw new Error("Failed to upload file to S3");
   }
 }
 
@@ -183,4 +143,29 @@ export async function downloadFile(key: string, credentials: AWSCredentials) {
   });
 
   return { signedUrl };
+}
+
+//generate pre-signed url for upload
+export async function generatePresignedUrl({
+  fileName,
+  fileType,
+  path,
+  credentials,
+}: {
+  fileName: string;
+  fileType: string;
+  path: string;
+  credentials: AWSCredentials;
+}) {
+  const s3Client = createClient(credentials);
+  const key = `${path}${fileName}`;
+
+  const command = new PutObjectCommand({
+    Bucket: credentials.bucketName,
+    Key: key,
+    ContentType: fileType,
+  });
+
+  const url = await getSignedUrl(s3Client, command, { expiresIn: 60 });
+  return { url };
 }

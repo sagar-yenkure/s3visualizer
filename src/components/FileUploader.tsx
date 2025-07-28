@@ -3,7 +3,8 @@ import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { X, Upload, File, CheckCircle, AlertCircle } from "lucide-react";
 import { FileUploadItem } from "../types";
-import { uploadToS3 } from "@/services/S3Service";
+import { generatePresignedUrl } from "@/services/S3Service";
+import { getAwsCredentials } from "@/lib/getAwsCredentials";
 
 interface FileUploaderProps {
   currentPath: string;
@@ -11,11 +12,11 @@ interface FileUploaderProps {
   onUploadComplete: () => void;
 }
 
-export const FileUploader: React.FC<FileUploaderProps> = ({
+export const FileUploader = ({
   currentPath,
   onClose,
   onUploadComplete,
-}) => {
+}: FileUploaderProps) => {
   const [uploadItems, setUploadItems] = useState<FileUploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -54,16 +55,48 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           )
         );
 
-        const key = currentPath
-          ? `${currentPath}${item.file.name}`
-          : item.file.name;
-
-        await uploadToS3(item.file, key, (progress) => {
-          setUploadItems((prev) =>
-            prev.map((item, idx) => (idx === i ? { ...item, progress } : item))
-          );
+        // 1. Get signed URL
+        const { url } = await generatePresignedUrl({
+          fileName: item.file.name,
+          fileType: item.file.type,
+          path: currentPath,
+          credentials: JSON.parse(getAwsCredentials() || ""),
         });
 
+        // 2. Upload via PUT request with progress tracking
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", url);
+          xhr.setRequestHeader("Content-Type", item.file.type);
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentage = Math.round((event.loaded / event.total) * 100);
+              setUploadItems((prev) =>
+                prev.map((item, idx) =>
+                  idx === i
+                    ? {
+                        ...item,
+                        progress: {
+                          loaded: event.loaded,
+                          total: event.total,
+                          percentage,
+                        },
+                      }
+                    : item
+                )
+              );
+            }
+          };
+
+          xhr.onload = () =>
+            xhr.status === 200 ? resolve() : reject(xhr.statusText);
+          xhr.onerror = reject;
+
+          xhr.send(item.file);
+        });
+
+        // 3. Mark as completed
         setUploadItems((prev) =>
           prev.map((item, idx) =>
             idx === i ? { ...item, status: "completed" } : item
@@ -87,14 +120,12 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
     setIsUploading(false);
 
-    // Check if all uploads completed successfully
     const allCompleted = uploadItems.every(
       (item) => item.status === "completed"
     );
+
     if (allCompleted) {
-      setTimeout(() => {
-        onUploadComplete();
-      }, 1000);
+      onUploadComplete();
     }
   };
 
@@ -108,7 +139,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <h3 className="text-xl font-bold text-gray-900">Upload Files</h3>
           <button
@@ -123,7 +154,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           {/* Drop Zone */}
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-xl p-8 hover:cursor-pointer text-center transition-colors ${
               isDragActive
                 ? "border-blue-400 bg-blue-50"
                 : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
@@ -192,7 +223,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                     {item.status === "pending" && (
                       <button
                         onClick={() => removeFile(index)}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1 text-gray-400 hover:cursor-pointer hover:text-red-500 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -214,16 +245,18 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           <div className="flex space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 hover:cursor-pointer text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={startUpload}
               disabled={uploadItems.length === 0 || isUploading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2 bg-blue-600 text-white hover:cursor-pointer rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isUploading ? "Uploading..." : "Upload Files"}
+              {isUploading
+                ? "Uploading..."
+                : `Upload File${uploadItems.length === 1 ? "" : "s"}`}
             </button>
           </div>
         </div>

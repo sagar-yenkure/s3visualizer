@@ -6,9 +6,8 @@ import {
   downloadFile,
   listS3Objects,
   testS3Connection,
-  uploadToS3,
 } from "@/services/S3Service";
-import { AWSCredentials, S3Object, UploadProgress } from "@/types";
+import { AWSCredentials, S3Object } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -37,27 +36,6 @@ export function useListS3Objects(
   return useQuery<S3Object[], Error>({
     queryKey: ["s3-objects", prefix],
     queryFn: () => listS3Objects(prefix, credentials),
-  });
-}
-
-// Upload file to S3
-export function useUploadToS3(onProgress?: (progress: UploadProgress) => void) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      file,
-      key,
-      credentials,
-    }: {
-      file: File;
-      key: string;
-      credentials: AWSCredentials;
-    }) => uploadToS3(file, credentials, key, onProgress),
-    onSuccess: () => {
-      toast.success("file uploaded to s3 successfully");
-      queryClient.invalidateQueries({ queryKey: ["s3-objects"] });
-    },
-    onError: () => toast.error("error while uploading file to s3"),
   });
 }
 

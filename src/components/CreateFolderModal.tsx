@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { X, FolderPlus } from 'lucide-react';
+import React, { useState } from "react";
+import { X, FolderPlus } from "lucide-react";
 
 interface CreateFolderModalProps {
   onClose: () => void;
   onConfirm: (folderName: string) => void;
 }
 
-export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ onClose, onConfirm }) => {
-  const [folderName, setFolderName] = useState('');
+export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
+  onClose,
+  onConfirm,
+}) => {
+  const [folderName, setFolderName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!folderName.trim()) return;
-    
+
     setIsCreating(true);
     try {
       await onConfirm(folderName.trim());
@@ -30,7 +33,9 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ onClose, o
             <div className="p-2 bg-emerald-100 rounded-lg">
               <FolderPlus className="w-5 h-5 text-emerald-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Create New Folder</h3>
+            <h3 className="text-xl font-bold text-gray-900">
+              Create New Folder
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -50,7 +55,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ onClose, o
                 type="text"
                 value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 border text-black border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter folder name..."
                 autoFocus
                 required
@@ -71,7 +76,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({ onClose, o
               disabled={!folderName.trim() || isCreating}
               className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isCreating ? 'Creating...' : 'Create Folder'}
+              {isCreating ? "Creating..." : "Create Folder"}
             </button>
           </div>
         </form>

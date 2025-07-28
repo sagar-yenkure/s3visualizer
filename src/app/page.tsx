@@ -19,9 +19,9 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <HeroSection />
+      <FeatureSection />
       <DemoSection />
       <SetupGuide />
-      <FeatureSection />
       <SecuritySection />
       <CTA />
     </div>
