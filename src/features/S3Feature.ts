@@ -14,18 +14,21 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 // test S3 connection
-export function useTestS3Connection(credentials: AWSCredentials,expireDays:number) {
+export function useTestS3Connection(
+  credentials: AWSCredentials,
+  expireDays: number
+) {
   const queryClient = useQueryClient();
   const router = useRouter();
   return useMutation({
     mutationFn: () => testS3Connection(credentials),
     onSuccess: () => {
       toast.success("connection with s3 approved");
-      storeAwsCredentials(credentials,expireDays)
+      storeAwsCredentials(credentials, expireDays);
       queryClient.invalidateQueries({ queryKey: ["s3-objects"] });
       router.push("/gallery");
     },
-    onError: () => toast.error("error while connection with s3"),
+    onError: () => toast.error("Error while connection with s3"),
   });
 }
 

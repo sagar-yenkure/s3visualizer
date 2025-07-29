@@ -5,13 +5,19 @@ import { AWSCredentials } from "@/types";
 // encrypting the aws api keys
 const encrypt = (data: object): string => {
   const json = JSON.stringify(data);
-  return CryptoJS.AES.encrypt(json, process.env.NEXT_PUBLIC_SECRET_KEY!).toString();
+  return CryptoJS.AES.encrypt(
+    json,
+    process.env.NEXT_PUBLIC_SECRET_KEY!
+  ).toString();
 };
 
 // decrypting the aws api keys
 const decrypt = (cipherText: string): object | null => {
   try {
-    const bytes = CryptoJS.AES.decrypt(cipherText, process.env.NEXT_PUBLIC_SECRET_KEY!);
+    const bytes = CryptoJS.AES.decrypt(
+      cipherText,
+      process.env.NEXT_PUBLIC_SECRET_KEY!
+    );
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
     return JSON.parse(decrypted);
   } catch (error) {
@@ -57,7 +63,7 @@ export const storeAwsCredentials = (
 };
 
 //remove AWS credentials
-export const removeAWSCredentials=()=>{
+export const removeAWSCredentials = () => {
   localStorage.removeItem("aws-s3-credentials");
   localStorage.removeItem("aws-s3-credentials-expiry");
-}
+};

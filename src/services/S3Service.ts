@@ -22,7 +22,7 @@ export async function testS3Connection(
     await s3Client.send(command);
   } catch (error) {
     console.error("Error testing S3 connection:", error);
-    throw new Error("Failed to connect to S3 bucket");
+    throw error;
   }
 }
 

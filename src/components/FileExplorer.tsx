@@ -6,10 +6,7 @@ import { FileGrid } from "./FileGrid";
 import { FileUploader } from "./FileUploader";
 import { CreateFolderModal } from "./CreateFolderModal";
 import { Upload, FolderPlus, LogOut, RefreshCw } from "lucide-react";
-import {
-  useCreateS3Folder,
-  useListS3Objects,
-} from "@/features/S3Feature";
+import { useCreateS3Folder, useListS3Objects } from "@/features/S3Feature";
 import { useRouter } from "next/navigation";
 import { getAwsCredentials, removeAWSCredentials } from "@/lib/awsCredentials";
 
@@ -36,22 +33,18 @@ export const FileExplorer = () => {
 
   const handlePathChange = (newPath: string) => setCurrentPath(newPath);
 
-
   // handle to create new folder in s3
   const handleFolderCreate = async (folderName: string) => {
     const folderPath = currentPath
       ? `${currentPath}${folderName}/`
       : `${folderName}/`;
-    try {
-      await createS3Folder({
-        folderPath: folderPath,
-        credentials: AWS_CREDENTIALS,
-      });
-      setModals((prev) => ({ ...prev, createFolder: false }));
-      refetch();
-    } catch (err) {
-      console.error("Error creating folder:", err);
-    }
+
+    await createS3Folder({
+      folderPath: folderPath,
+      credentials: AWS_CREDENTIALS,
+    });
+    setModals((prev) => ({ ...prev, createFolder: false }));
+    refetch();
   };
 
   // handle after upload close modal and refetch object list
@@ -62,7 +55,7 @@ export const FileExplorer = () => {
 
   // handle to disconnect from aws s3 and remove the s3 keys
   const handleDisconnect = () => {
-    removeAWSCredentials()
+    removeAWSCredentials();
     router.push("/");
   };
 

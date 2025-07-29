@@ -1,215 +1,216 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Eye,
-  EyeOff,
-  Key,
-  Cloud,
-  AlertCircle,
-  ShieldCheck,
-} from "lucide-react";
-import { AWSCredentials } from "../types";
-import { useTestS3Connection } from "@/features/S3Feature";
+import { Eye, EyeOff, Cloud, AlertCircle, Shield, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { awsCredentialsSchema } from "@/zod/awsSchema";
 import { regions } from "@/constants";
+import { useTestS3Connection } from "@/features/S3Feature";
 
 export const CredentialManager = () => {
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [expireDays, setExpireDays] = useState<number>(7); // Default 7 days
-  const [credentials, setCredentials] = useState<AWSCredentials>({
-    accessKeyId: "",
-    secretAccessKey: "",
-    region: "ap-south-1",
-    bucketName: "",
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(awsCredentialsSchema),
+    defaultValues: {
+      accessKeyId: "",
+      secretAccessKey: "",
+      region: "ap-south-1",
+      bucketName: "",
+      expireDays: 7,
+    },
   });
 
-  const { mutate, isPending: isConnecting } = useTestS3Connection(credentials,expireDays);
+  const credentials = watch(); // for useTestS3Connection
+  const { mutate, isPending: isConnecting } = useTestS3Connection(
+    {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+      region: credentials.region,
+      bucketName: credentials.bucketName,
+    },
+    credentials.expireDays
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    if (!credentials) return;
-    e.preventDefault();
+  const onSubmit = () => {
+    setError(null);
     mutate();
   };
 
-  const handleInputChange =
-    (field: keyof AWSCredentials) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setCredentials((prev) => ({ ...prev, [field]: e.target.value }));
-      if (error) setError(null);
-    };
-
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <header className="text-center mb-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-3">
-            AWS S3 Visual Manager
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+            <Cloud className="w-8 h-8 text-blue-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            AWS S3 Manager
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Professional cloud storage management with intuitive visual
-            interface
-          </p>
-        </header>
-
-        <div className="px-6 py-4 bg-gray-50 text-center">
-          <p className="text-sm text-gray-500 flex items-center justify-center gap-1">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            Your credentials are securely stored locally and never leave your
-            browser.
+          <p className="text-gray-600 max-w-lg mx-auto">
+            Connect to your S3 bucket with secure credential management
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white/20 rounded-xl">
-                  <Key className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    Connect to AWS S3
-                  </h2>
-                  <p className="text-blue-100">
-                    Enter your AWS credentials to get started
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* Security Notice */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start space-x-3 justify-center">
+            <Shield className="w-5 h-5 text-emerald-600" />
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 text-black">
-              {error && (
-                <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <p className="text-red-700">{error}</p>
-                </div>
-              )}
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Access Key ID
-                  </label>
-                  <input
-                    type="text"
-                    value={credentials.accessKeyId}
-                    onChange={handleInputChange("accessKeyId")}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                    placeholder="AKIA***********"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Region
-                  </label>
-                  <select
-                    value={credentials.region}
-                    onChange={handleInputChange("region")}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                    required
-                  >
-                    {regions?.map((region) => (
-                      <option key={region} value={region}>
-                        {region}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  Secret Access Key
-                </label>
-                <div className="relative">
-                  <input
-                    type={showSecretKey ? "text" : "password"}
-                    value={credentials.secretAccessKey}
-                    onChange={handleInputChange("secretAccessKey")}
-                    className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                    placeholder="*******************"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSecretKey(!showSecretKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showSecretKey ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  Bucket Name
-                </label>
-                <input
-                  type="text"
-                  value={credentials.bucketName}
-                  onChange={handleInputChange("bucketName")}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                  placeholder="my-s3-bucket"
-                  required
-                />
-              </div>
-              <div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Store credentials for (days)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={90}
-                    value={expireDays}
-                    onChange={(e) => setExpireDays(parseInt(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                    placeholder="Enter days eg. 7, 15, 30"
-                    required
-                  />
-                </div>
-                {expireDays > 0 && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    Note: Your AWS credentials will be automatically removed
-                    after{" "}
-                    <span className="font-medium text-gray-700">
-                      {expireDays} day{expireDays > 1 ? "s" : ""}
-                    </span>{" "}
-                    from your system.
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isConnecting}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {isConnecting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Connecting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Cloud className="w-5 h-5" />
-                    <span>Connect to S3</span>
-                  </>
-                )}
-              </button>
-            </form>
+            <p className="text-sm text-emerald-700">
+              Your credentials are encrypted and stored locally. They never
+              leave your browser.
+            </p>
           </div>
         </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="bg-white text-black rounded-xl shadow-sm border border-gray-200 p-6 space-y-6"
+        >
+          {error && (
+            <div className="flex items-center space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Access Key ID *
+              </label>
+              <input
+                {...register("accessKeyId")}
+                className="w-full px-3 py-2.5 border rounded-lg text-sm"
+                placeholder="AKIA********"
+              />
+              {errors.accessKeyId && (
+                <p className="text-red-600 text-sm">
+                  {errors.accessKeyId.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Region *
+              </label>
+              <select
+                {...register("region")}
+                className="w-full px-3 py-2.5 border rounded-lg text-sm"
+              >
+                {regions.map((region) => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Secret Key Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Secret Access Key *
+            </label>
+            <div className="relative">
+              <input
+                {...register("secretAccessKey")}
+                type={showSecretKey ? "text" : "password"}
+                placeholder="Enter your secret access key"
+                className="w-full px-3 py-2.5 pr-10 border rounded-lg text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowSecretKey((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showSecretKey ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {errors.secretAccessKey && (
+              <p className="text-red-600 text-sm">
+                {errors.secretAccessKey.message}
+              </p>
+            )}
+          </div>
+
+          {/* Bucket Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Bucket Name *
+            </label>
+            <input
+              {...register("bucketName")}
+              placeholder="my-s3-bucket"
+              className="w-full px-3 py-2.5 border rounded-lg text-sm"
+            />
+            {errors.bucketName && (
+              <p className="text-red-600 text-sm">
+                {errors.bucketName.message}
+              </p>
+            )}
+          </div>
+
+          {/* Expire Days */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Storage Duration (days) *
+            </label>
+            <input
+              {...register("expireDays", { valueAsNumber: true })}
+              type="number"
+              className="w-full px-3 py-2.5 border rounded-lg text-sm"
+              placeholder="7"
+            />
+            {errors.expireDays && (
+              <p className="text-red-600 text-sm">
+                {errors.expireDays.message}
+              </p>
+            )}
+            {credentials.expireDays > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                Credentials will be auto-removed after {credentials.expireDays}{" "}
+                day
+                {credentials.expireDays !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isConnecting}
+            className="w-full bg-blue-600 hover:cursor-pointer hover:bg-blue-700 disabled:bg-blue-300 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2"
+          >
+            {isConnecting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              <>
+                <Cloud className="w-4 h-4" />
+                Connect to S3
+              </>
+            )}
+          </button>
+        </form>
       </div>
-    </section>
+    </div>
   );
 };

@@ -17,15 +17,11 @@ const SetupGuide = () => {
   };
 
   const copyToClipboard = async (text: string, itemId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedItems((prev) => [...prev, itemId]);
-      setTimeout(() => {
-        setCopiedItems((prev) => prev.filter((id) => id !== itemId));
-      }, 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
+    await navigator.clipboard.writeText(text);
+    setCopiedItems((prev) => [...prev, itemId]);
+    setTimeout(() => {
+      setCopiedItems((prev) => prev.filter((id) => id !== itemId));
+    }, 2000);
   };
 
   return (
