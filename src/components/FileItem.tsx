@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { Folder, File, MoreVertical} from "lucide-react";
+import { Folder, File, MoreVertical } from "lucide-react";
 import { S3Object } from "../types";
 import { fileTypeMap } from "@/constants";
 import { FileActionMenu } from "./FileMenu";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 
 interface FileItemProps {
   object: S3Object;
@@ -76,10 +77,12 @@ export const FileItem: React.FC<FileItemProps> = ({ object, onClick }) => {
         {showMenu && (
           <>
             <div
-              className="fixed inset-0 z-10"
+              className="fixed inset-0 z-10 hover:cursor-pointer"
               onClick={() => setShowMenu(false)}
             />
-            <FileActionMenu object={object} setShowMenu={setShowMenu} />
+            {getAwsCredentials() && (
+              <FileActionMenu object={object} setShowMenu={setShowMenu} />
+            )}
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { FolderPlus, RefreshCw, Upload } from "lucide-react";
+import { FolderPlus, LogOut, RefreshCw, Upload } from "lucide-react";
 import { DemoFileGrid } from "./DemoFileGrid";
 import { Breadcrumb } from "./Breadcrumb";
 
@@ -27,13 +27,17 @@ const DemoSection = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <button className="flex items-center space-x-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-xs border border-gray-200">
+                  <button className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-xs border border-gray-200">
                     <FolderPlus className="w-3 h-3" />
                     <span>New Folder</span>
                   </button>
-                  <button className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs">
+                  <button className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs">
                     <Upload className="w-3 h-3" />
                     <span>Upload</span>
+                  </button>
+                  <button className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs">
+                    <LogOut className="w-3 h-3" />
+                    <span className="hidden md:flex">Disconnect</span>
                   </button>
                 </div>
               </div>

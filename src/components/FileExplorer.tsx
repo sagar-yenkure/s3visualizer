@@ -97,27 +97,25 @@ export const FileExplorer = () => {
                   onClick={() =>
                     setModals((prev) => ({ ...prev, createFolder: true }))
                   }
-                  className="flex hover:cursor-pointer items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100"
+                  className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-xs border border-gray-200"
                 >
-                  <FolderPlus className="w-4 h-4" />
+                  <FolderPlus className="w-3 h-3" />
                   <span>New Folder</span>
                 </button>
-
                 <button
                   onClick={() =>
                     setModals((prev) => ({ ...prev, uploader: true }))
                   }
-                  className="flex hover:cursor-pointer items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+                  className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs"
                 >
-                  <Upload className="w-4 h-4" />
+                  <Upload className="w-3 h-3" />
                   <span>Upload</span>
                 </button>
-
                 <button
                   onClick={handleDisconnect}
-                  className="flex items-center hover:cursor-pointer space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl"
+                  className="flex hover:cursor-pointer items-center space-x-1.5 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3 h-3" />
                   <span className="hidden md:flex">Disconnect</span>
                 </button>
               </div>
