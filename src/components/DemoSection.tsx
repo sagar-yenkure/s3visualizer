@@ -1,4 +1,4 @@
-import { FolderPlus, Home, RefreshCw, Upload } from "lucide-react";
+import { FolderPlus, RefreshCw, Upload } from "lucide-react";
 import { DemoFileGrid } from "./DemoFileGrid";
 import { Breadcrumb } from "./Breadcrumb";
 

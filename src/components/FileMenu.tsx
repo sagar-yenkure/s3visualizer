@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Download, Trash2, Pencil, CopyIcon } from "lucide-react";
+import { Download, Trash2, CopyIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { AWSCredentials, S3Object } from "../types";
 import { useDeleteS3Object, useDownloadFile } from "@/features/S3Feature";

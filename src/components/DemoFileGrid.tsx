@@ -11,8 +11,6 @@ export const DemoFileGrid: React.FC = () => {
         objects={demoObjects}
         loading={false}
         onFolderClick={() => {}}
-        onFileDelete={() => {}}
-        onFileDownload={() => {}}
       />
     </div>
   );

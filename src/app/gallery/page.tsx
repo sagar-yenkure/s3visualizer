@@ -12,7 +12,7 @@ const GalleryPage = () => {
   const AWS_CREDENTIALS = getAwsCredentials();
   if (!AWS_CREDENTIALS) return router.push("/credentials");
 
-  return <FileExplorer AWS_CREDENTIALS={JSON.parse(AWS_CREDENTIALS)} />;
+  return <FileExplorer />;
 };
 
 export default GalleryPage;
