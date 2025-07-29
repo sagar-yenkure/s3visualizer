@@ -2,23 +2,17 @@
 
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { Folder, File, MoreVertical, Trash2, Download } from "lucide-react";
+import { Folder, File, MoreVertical} from "lucide-react";
 import { S3Object } from "../types";
 import { fileTypeMap } from "@/constants";
+import { FileActionMenu } from "./FileMenu";
 
 interface FileItemProps {
   object: S3Object;
   onClick?: (object: S3Object) => void;
-  onDelete: (object: S3Object) => void;
-  onDownload: (url: string) => void;
 }
 
-export const FileItem: React.FC<FileItemProps> = ({
-  object,
-  onClick,
-  onDelete,
-  onDownload,
-}) => {
+export const FileItem: React.FC<FileItemProps> = ({ object, onClick }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const getFileMeta = (name: string, isFolder: boolean) => {
@@ -85,32 +79,7 @@ export const FileItem: React.FC<FileItemProps> = ({
               className="fixed inset-0 z-10"
               onClick={() => setShowMenu(false)}
             />
-            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[120px]">
-              {!object.isFolder && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDownload(object.key);
-                    setShowMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download</span>
-                </button>
-              )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(object);
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete</span>
-              </button>
-            </div>
+            <FileActionMenu object={object} setShowMenu={setShowMenu} />
           </>
         )}
       </div>

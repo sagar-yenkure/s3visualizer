@@ -5,22 +5,17 @@ import { Breadcrumb } from "./Breadcrumb";
 import { FileGrid } from "./FileGrid";
 import { FileUploader } from "./FileUploader";
 import { CreateFolderModal } from "./CreateFolderModal";
-import { AWSCredentials, S3Object } from "../types";
 import { Upload, FolderPlus, LogOut, RefreshCw } from "lucide-react";
 import {
   useCreateS3Folder,
-  useDeleteS3Object,
-  useDownloadFile,
   useListS3Objects,
 } from "@/features/S3Feature";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { getAwsCredentials } from "@/lib/getAwsCredentials";
 
-export const FileExplorer = ({
-  AWS_CREDENTIALS,
-}: {
-  AWS_CREDENTIALS: AWSCredentials;
-}) => {
+export const FileExplorer = () => {
+  const AWS_CREDENTIALS = JSON.parse(getAwsCredentials() || "");
+
   const router = useRouter();
   const [currentPath, setCurrentPath] = useState<string>("");
   const [modals, setModals] = useState({
@@ -38,10 +33,6 @@ export const FileExplorer = ({
 
   //  Create folder
   const { mutateAsync: createS3Folder } = useCreateS3Folder();
-  //  Delete file/folder
-  const { mutateAsync: deleteS3Object } = useDeleteS3Object();
-  // Download file
-  const { mutateAsync: downloadFile } = useDownloadFile();
 
   const handlePathChange = (newPath: string) => setCurrentPath(newPath);
 
@@ -64,19 +55,6 @@ export const FileExplorer = ({
   const handleUploadComplete = async () => {
     setModals((prev) => ({ ...prev, uploader: false }));
     refetch();
-  };
-
-  const handleObjectDelete = async (object: S3Object) => {
-    toast.promise(
-      deleteS3Object({ key: object.key, credentials: AWS_CREDENTIALS }),
-      {
-        loading: "deleting...",
-      }
-    );
-  };
-
-  const handleObjetDownload = (key: string) => {
-    downloadFile({ key, credentials: AWS_CREDENTIALS });
   };
 
   const handleDisconnect = () => {
@@ -174,8 +152,6 @@ export const FileExplorer = ({
               objects={objects}
               loading={loading}
               onFolderClick={(folder) => handlePathChange(folder.path)}
-              onFileDelete={handleObjectDelete}
-              onFileDownload={handleObjetDownload}
             />
           )}
         </div>
