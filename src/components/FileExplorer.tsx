@@ -72,12 +72,12 @@ export const FileExplorer = () => {
                   <span className="text-white font-bold text-sm">S3</span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h1 className="text-xl font-bold text-gray-900">
                     {AWS_CREDENTIALS.bucketName}
-                  </h2>
-                  <p className="text-sm text-gray-500">
+                  </h1>
+                  <h2 className="text-sm text-gray-500">
                     {AWS_CREDENTIALS.region}
-                  </p>
+                  </h2>
                 </div>
                 <button
                   onClick={() => refetch()}
