@@ -1,7 +1,7 @@
 "use client";
 
 import { FileExplorer } from "@/components/FileExplorer";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 import { useRouter } from "next/navigation";
 import React from "react";
 

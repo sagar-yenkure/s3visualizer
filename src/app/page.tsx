@@ -6,7 +6,7 @@ import SecuritySection from "@/components/SecuritySection";
 import DemoSection from "@/components/DemoSection";
 import FeatureSection from "@/components/FeatureSection";
 import HeroSection from "@/components/HeroSection";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 import SetupGuide from "@/components/SetupGuide";
 
 function App() {

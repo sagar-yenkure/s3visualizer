@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { X, Upload, File, CheckCircle, AlertCircle } from "lucide-react";
 import { FileUploadItem } from "../types";
 import { generatePresignedUrl } from "@/services/S3Service";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 
 interface FileUploaderProps {
   currentPath: string;

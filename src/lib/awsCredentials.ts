@@ -20,7 +20,7 @@ const decrypt = (cipherText: string): object | null => {
   }
 };
 
-// get AWS credentials from storage and decrypt it
+// get AWS credentials from storage and decryption
 export const getAwsCredentials = (): string | null => {
   if (typeof window === "undefined") return null;
 
@@ -44,7 +44,7 @@ export const getAwsCredentials = (): string | null => {
   }
 };
 
-// save AWS credentials in storage with encrypt
+// save AWS credentials with encryption
 export const storeAwsCredentials = (
   credentials: AWSCredentials,
   expireDays: number
@@ -55,3 +55,9 @@ export const storeAwsCredentials = (
   localStorage.setItem("aws-s3-credentials", encryptedCredentials);
   localStorage.setItem("aws-s3-credentials-expiry", day);
 };
+
+//remove AWS credentials
+export const removeAWSCredentials=()=>{
+  localStorage.removeItem("aws-s3-credentials");
+  localStorage.removeItem("aws-s3-credentials-expiry");
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { CredentialManager } from "@/components/CredentialManager";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 import { useRouter } from "next/navigation";
 
 function App() {

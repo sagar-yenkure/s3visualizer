@@ -11,7 +11,7 @@ import {
   useListS3Objects,
 } from "@/features/S3Feature";
 import { useRouter } from "next/navigation";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials, removeAWSCredentials } from "@/lib/awsCredentials";
 
 export const FileExplorer = () => {
   const AWS_CREDENTIALS = JSON.parse(getAwsCredentials() || "");
@@ -36,6 +36,8 @@ export const FileExplorer = () => {
 
   const handlePathChange = (newPath: string) => setCurrentPath(newPath);
 
+
+  // handle to create new folder in s3
   const handleFolderCreate = async (folderName: string) => {
     const folderPath = currentPath
       ? `${currentPath}${folderName}/`
@@ -52,13 +54,15 @@ export const FileExplorer = () => {
     }
   };
 
+  // handle after upload close modal and refetch object list
   const handleUploadComplete = async () => {
     setModals((prev) => ({ ...prev, uploader: false }));
     refetch();
   };
 
+  // handle to disconnect from aws s3 and remove the s3 keys
   const handleDisconnect = () => {
-    localStorage.removeItem("aws-s3-credentials");
+    removeAWSCredentials()
     router.push("/");
   };
 

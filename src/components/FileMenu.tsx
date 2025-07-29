@@ -5,7 +5,7 @@ import { Download, Trash2, CopyIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { AWSCredentials, S3Object } from "../types";
 import { useDeleteS3Object, useDownloadFile } from "@/features/S3Feature";
-import { getAwsCredentials } from "@/lib/getAwsCredentials";
+import { getAwsCredentials } from "@/lib/awsCredentials";
 
 interface FileActionMenuProps {
   object: S3Object;

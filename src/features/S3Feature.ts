@@ -1,6 +1,6 @@
 "use client";
 
-import { storeAwsCredentials } from "@/lib/getAwsCredentials";
+import { storeAwsCredentials } from "@/lib/awsCredentials";
 import {
   createS3Folder,
   deleteS3Object,
