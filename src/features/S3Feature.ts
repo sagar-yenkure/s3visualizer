@@ -1,5 +1,6 @@
 "use client";
 
+import { storeAwsCredentials } from "@/lib/getAwsCredentials";
 import {
   createS3Folder,
   deleteS3Object,
@@ -13,14 +14,14 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 // test S3 connection
-export function useTestS3Connection(credentials: AWSCredentials) {
+export function useTestS3Connection(credentials: AWSCredentials,expireDays:number) {
   const queryClient = useQueryClient();
   const router = useRouter();
   return useMutation({
     mutationFn: () => testS3Connection(credentials),
     onSuccess: () => {
       toast.success("connection with s3 approved");
-      localStorage.setItem("aws-s3-credentials", JSON.stringify(credentials));
+      storeAwsCredentials(credentials,expireDays)
       queryClient.invalidateQueries({ queryKey: ["s3-objects"] });
       router.push("/gallery");
     },

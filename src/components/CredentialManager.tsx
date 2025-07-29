@@ -17,6 +17,7 @@ export const CredentialManager = () => {
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [expireDays, setExpireDays] = useState<number>(7); // Default 7 days
   const [credentials, setCredentials] = useState<AWSCredentials>({
     accessKeyId: "",
     secretAccessKey: "",
@@ -24,7 +25,7 @@ export const CredentialManager = () => {
     bucketName: "",
   });
 
-  const { mutate, isPending: isConnecting } = useTestS3Connection(credentials);
+  const { mutate, isPending: isConnecting } = useTestS3Connection(credentials,expireDays);
 
   const handleSubmit = async (e: React.FormEvent) => {
     if (!credentials) return;
@@ -159,6 +160,33 @@ export const CredentialManager = () => {
                   placeholder="my-s3-bucket"
                   required
                 />
+              </div>
+              <div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Store credentials for (days)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={90}
+                    value={expireDays}
+                    onChange={(e) => setExpireDays(parseInt(e.target.value))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                    placeholder="Enter days eg. 7, 15, 30"
+                    required
+                  />
+                </div>
+                {expireDays > 0 && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Note: Your AWS credentials will be automatically removed
+                    after{" "}
+                    <span className="font-medium text-gray-700">
+                      {expireDays} day{expireDays > 1 ? "s" : ""}
+                    </span>{" "}
+                    from your system.
+                  </p>
+                )}
               </div>
 
               <button
