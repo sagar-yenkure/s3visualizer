@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: `https://storage.sagaryenkure.pro/sitemap.xml`,
+    sitemap: `https://s3visualizer.vercel.app/sitemap.xml`,
   };
 }

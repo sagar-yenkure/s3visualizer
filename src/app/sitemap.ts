@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const BaseUrl = "https://storage.sagaryenkure.pro";
+const BaseUrl = "https://s3visualizer.vercel.app";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {

@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     "Drag and Drop S3",
   ],
   alternates: {
-    canonical: "https://storage.sagaryenkure.pro",
+    canonical: "https://s3visualizer.vercel.app",
   },
-  metadataBase: new URL("https://storage.sagaryenkure.pro"),
+  metadataBase: new URL("https://s3visualizer.vercel.app"),
   robots: {
     index: true,
     follow: true,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: "S3 Visualizer — Manage AWS S3 Buckets with Ease",
     description:
       "Explore, upload, and organize your AWS S3 content visually. Full CRUD operations, public links, and a user-friendly interface.",
-    url: "https://storage.sagaryenkure.pro",
+    url: "https://s3visualizer.vercel.app",
     siteName: "S3 Visualizer",
     images: [
       {
